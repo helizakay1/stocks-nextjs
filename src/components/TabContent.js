@@ -5,6 +5,7 @@ import History from "./History";
 import moment from "moment";
 import { TabsEnum } from "../constants/tabs";
 import { Periods } from "../constants/periods";
+import { reduceData } from "../helpers/reduceData";
 
 function TabContent({ content }) {
   const [period, setPeriod] = useState(1);
@@ -15,6 +16,7 @@ function TabContent({ content }) {
   const [endTime, setEndTime] = useState(moment().format("MM/DD/YYYY%20HH:mm"));
   const [timeSpan, setTimeSpan] = useState("day");
   const [stockData, setStockData] = useState([]);
+  const [reduce, setReduce] = useState(false);
 
   const cache = useRef({});
 
@@ -26,8 +28,16 @@ function TabContent({ content }) {
       )
         .then((response) => response.json())
         .then((result) => {
-          cache.current[`${period}${precision}${startTime}${endTime}`] = result;
-          setStockData(result);
+          if (reduce) {
+            const reducedResult = reduceData(result);
+            cache.current[`${period}${precision}${startTime}${endTime}`] =
+              reducedResult;
+            setStockData(reducedResult);
+          } else {
+            cache.current[`${period}${precision}${startTime}${endTime}`] =
+              result;
+            setStockData(result);
+          }
         });
     } else {
       // GET FROM CACHE
@@ -47,6 +57,7 @@ function TabContent({ content }) {
       moment().subtract(1, current.timeSpan).format("MM/DD/YYYY%20HH:mm")
     );
     setEndTime(moment().format("MM/DD/YYYY%20HH:mm"));
+    setReduce(current.reduce);
   };
 
   return (

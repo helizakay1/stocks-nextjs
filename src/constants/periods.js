@@ -20,4 +20,12 @@ export const Periods = [
     timeSpan: "day",
     period: 1,
   },
+  {
+    key: "1-week",
+    label: " 1 Week",
+    precision: "Hours",
+    timeSpan: "month",
+    period: 1,
+    reduce: true,
+  },
 ];
