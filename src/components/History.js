@@ -3,9 +3,16 @@ import moment from "moment";
 import { VscTriangleUp, VscTriangleDown } from "react-icons/vsc";
 
 function History({ data }) {
+  const dataWithChange = data.map((d) => {
+    return {
+      ...d,
+      Change: (d.Close - d.Open) / d.Close,
+    };
+  });
   const [sortKey, setSortKey] = useState("Date");
   const [sortDirection, setSortDirection] = useState(true);
-  const TABLE_COLUMNS = ["Date", "High", "Low", "Open", "Close"];
+  const TABLE_COLUMNS = ["Date", "High", "Low", "Open", "Close", "Change"];
+  const TABLE_LABELS = ["Date", "High", "Low", "Open", "Close", "% Change"];
 
   const sortFunc = (a, b) => {
     if (sortDirection) {
@@ -39,7 +46,7 @@ function History({ data }) {
             {TABLE_COLUMNS.map((col, index) => (
               <th key={index}>
                 <div className="flex-row">
-                  <span className="col-label">{col}</span>
+                  <span className="col-label">{TABLE_LABELS[index]}</span>
                   <span className="flex-col">
                     <VscTriangleUp
                       onClick={() => {
@@ -64,9 +71,11 @@ function History({ data }) {
               </th>
             ))}
           </tr>
-          {data.sort(sortFunc).map((dataLine, index) => {
-            let { Date, High, Low, Open, Close } = dataLine;
+          {dataWithChange.sort(sortFunc).map((dataLine, index) => {
+            let { Date, High, Low, Open, Close, Change } = dataLine;
             Date = formatTableDate(Date);
+            const percentChange = Change * 100;
+            const isPositive = percentChange > 0;
             return (
               <tr key={index}>
                 <td>{Date}</td>
@@ -74,6 +83,10 @@ function History({ data }) {
                 <td>{Low}</td>
                 <td>{Open}</td>
                 <td>{Close}</td>
+                <td className={isPositive ? "green" : "red"}>
+                  {isPositive && "+"}
+                  {percentChange.toFixed(2)}%
+                </td>
               </tr>
             );
           })}
